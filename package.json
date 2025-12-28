@@ -1,0 +1,21 @@
+{
+  "name": "pdf-to-web-form-autofill",
+  "version": "1.0.0",
+  "description": "Chrome extension to extract data from PDF biodata and automatically fill web forms",
+  "main": "background.js",
+  "scripts": {
+    "generate-icons": "python3 generate_icons.py"
+  },
+  "keywords": [
+    "chrome-extension",
+    "pdf-parser",
+    "form-filler",
+    "autofill",
+    "biodata"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
+

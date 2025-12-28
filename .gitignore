@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+lib/pdf.min.js
+lib/pdf.worker.min.js
+
+# Icons (generated)
+icons/*.png
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Form Filler</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>PDF Form Filler</h1>
+      <p class="subtitle">Upload PDF and fill form automatically</p>
+    </div>
+    
+    <div class="upload-section">
+      <label for="pdf-upload" class="upload-label">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <span id="upload-text">Upload PDF</span>
+      </label>
+      <input type="file" id="pdf-upload" accept=".pdf" hidden>
+      <div id="file-info" class="file-info hidden"></div>
+    </div>
+
+    <div class="status-section">
+      <div id="status-message" class="status-message"></div>
+      <div id="progress-bar" class="progress-bar hidden">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="fill-form-btn" class="btn btn-primary" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Fill Form
+      </button>
+      <button id="clear-btn" class="btn btn-secondary">
+        Clear
+      </button>
+    </div>
+
+    <div id="extracted-data" class="extracted-data hidden">
+      <h3>Extracted Data Preview</h3>
+      <pre id="data-preview"></pre>
+    </div>
+  </div>
+  <script src="lib/pdf.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
+
