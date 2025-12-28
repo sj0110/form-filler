@@ -239,9 +239,8 @@ function extractStructuredData(text) {
     if (heightMatch) {
       data.heightFeet = String(heightMatch[1]);
       data.heightInches = String(heightMatch[2]);
-      // Convert to cm (approximate)
-      const totalInches = parseInt(heightMatch[1]) * 12 + parseInt(heightMatch[2]);
-      data.heightCms = String(Math.round(totalInches * 2.54));
+      // Hardcode height in cm to 0
+      data.heightCms = '0';
     }
   }
   
@@ -251,9 +250,10 @@ function extractStructuredData(text) {
     const weightLbsMatch = data.weight.match(/(\d+)\s*lbs?/i);
     if (weightKgMatch) {
       data.weightKg = String(weightKgMatch[1]);
-      data.weightLbs = String(Math.round(parseInt(weightKgMatch[1]) * 2.20462));
+      // Hardcode weight in lbs to 0
+      data.weightLbs = '0';
     } else if (weightLbsMatch) {
-      data.weightLbs = String(weightLbsMatch[1]);
+      data.weightLbs = '0';
       data.weightKg = String(Math.round(parseInt(weightLbsMatch[1]) / 2.20462));
     }
   }
