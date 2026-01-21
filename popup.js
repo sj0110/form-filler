@@ -249,12 +249,15 @@ function extractStructuredData(text) {
     const weightKgMatch = data.weight.match(/(\d+)\s*kg/i);
     const weightLbsMatch = data.weight.match(/(\d+)\s*lbs?/i);
     if (weightKgMatch) {
-      data.weightKg = String(weightKgMatch[1]);
+      // Include "kg" along with the numeric value
+      data.weightKg = `${weightKgMatch[1]} kg`;
       // Hardcode weight in lbs to 0
       data.weightLbs = '0';
     } else if (weightLbsMatch) {
       data.weightLbs = '0';
-      data.weightKg = String(Math.round(parseInt(weightLbsMatch[1]) / 2.20462));
+      // Include "kg" when converting from lbs
+      const convertedKg = Math.round(parseInt(weightLbsMatch[1]) / 2.20462);
+      data.weightKg = `${convertedKg} kg`;
     }
   }
   
