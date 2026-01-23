@@ -2,28 +2,58 @@
 
 let extractedData = null;
 let pdfFile = null;
+let pdfjsInitialized = false;
 
 // Initialize PDF.js when popup loads
 function initializePDFjs() {
   if (typeof pdfjsLib !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('lib/pdf.worker.min.js');
-    return true;
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('lib/pdf.worker.min.js');
+      pdfjsInitialized = true;
+      console.log('PDF.js initialized successfully');
+      return true;
+    } catch (error) {
+      console.error('Error initializing PDF.js:', error);
+      return false;
+    }
   }
   return false;
 }
 
-// Wait for PDF.js to load
-window.addEventListener('load', () => {
-  if (!initializePDFjs()) {
-    // Retry after a short delay if PDF.js isn't loaded yet
-    setTimeout(() => {
-      initializePDFjs();
-    }, 100);
-  }
-});
+// Wait for PDF.js to load with retries
+function waitForPDFjs(maxRetries = 10, delay = 100) {
+  return new Promise((resolve, reject) => {
+    let attempts = 0;
+    
+    const checkPDFjs = () => {
+      attempts++;
+      if (initializePDFjs()) {
+        resolve(true);
+      } else if (attempts < maxRetries) {
+        setTimeout(checkPDFjs, delay);
+      } else {
+        reject(new Error('PDF.js library failed to load after multiple attempts'));
+      }
+    };
+    
+    // Start checking immediately
+    checkPDFjs();
+  });
+}
 
-// Initialize immediately if already loaded
-initializePDFjs();
+// Initialize PDF.js when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    waitForPDFjs().catch(error => {
+      console.error('PDF.js initialization error:', error);
+    });
+  });
+} else {
+  // DOM already loaded
+  waitForPDFjs().catch(error => {
+    console.error('PDF.js initialization error:', error);
+  });
+}
 
 document.getElementById('pdf-upload').addEventListener('change', handleFileUpload);
 document.getElementById('fill-form-btn').addEventListener('click', handleFillForm);
@@ -72,13 +102,23 @@ async function handleFileUpload(event) {
 
 async function parsePDF(arrayBuffer) {
   try {
-    // Ensure PDF.js is loaded
-    if (typeof pdfjsLib === 'undefined') {
-      throw new Error('PDF.js library not loaded');
+    // Ensure PDF.js is loaded and initialized
+    if (typeof pdfjsLib === 'undefined' || !pdfjsInitialized) {
+      // Try to initialize one more time
+      if (!initializePDFjs()) {
+        // Wait a bit and try again
+        await waitForPDFjs(5, 200);
+      }
     }
     
-    // Set worker source
-    pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('lib/pdf.worker.min.js');
+    if (typeof pdfjsLib === 'undefined') {
+      throw new Error('PDF.js library not loaded. Please refresh the extension popup.');
+    }
+    
+    // Ensure worker source is set
+    if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('lib/pdf.worker.min.js');
+    }
     
     // Load PDF
     const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
