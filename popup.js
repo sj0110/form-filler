@@ -186,10 +186,14 @@ function extractStructuredData(text) {
   };
   
   // Find all field label positions in the text (only first occurrence of each unique label)
+  // Also include special text field labels that can act as delimiters
   const findFieldPositions = () => {
     const positions = [];
     const seenLabels = new Set();
     const allLabels = Object.values(fieldMappings).flat();
+    
+    // Add special text field labels that can act as delimiters
+    const specialLabels = ['More About Self', 'Your Expectation', 'About Parents Siblings'];
     
     // Create a map of label -> first position
     const labelPositions = new Map();
@@ -204,6 +208,20 @@ function extractStructuredData(text) {
         ? new RegExp(`${escapedLabel.replace(/\s+/g, '\\s+')}:\\s*`, 'i')
         : new RegExp(`\\b${escapedLabel}:\\s*`, 'i');
       
+      const match = text.match(regex);
+      if (match) {
+        labelPositions.set(label, {
+          label: label,
+          index: match.index,
+          endIndex: match.index + match[0].length
+        });
+      }
+    }
+    
+    // Also find special text field labels
+    for (const label of specialLabels) {
+      const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`${escapedLabel.replace(/\s+/g, '\\s+')}:\\s*`, 'i');
       const match = text.match(regex);
       if (match) {
         labelPositions.set(label, {
@@ -239,7 +257,45 @@ function extractStructuredData(text) {
       if (labelPos) {
         const startIndex = labelPos.endIndex;
         
-        // Find the next field label after this one
+        // Special handling for annualIncome - stop at "per annum" or at next field label
+        if (key === 'annualIncome') {
+          // Find the next field label after this one (including special labels)
+          let endIndex = text.length;
+          for (const pos of positions) {
+            if (pos.index > startIndex) {
+              endIndex = pos.index;
+              break;
+            }
+          }
+          
+          // Extract text up to the next field label
+          let value = extractValue(startIndex, endIndex);
+          
+          // If "per annum" is found, stop there (it should be part of the value)
+          const perAnnumIndex = value.toLowerCase().indexOf('per annum');
+          if (perAnnumIndex !== -1) {
+            // Extract up to and including "per annum"
+            value = value.substring(0, perAnnumIndex + 'per annum'.length).trim();
+          } else {
+            // If "per annum" is not in the extracted text, check if it's in the original text
+            // and stop at "More About Self" or other markers
+            const stopMarkers = ['More About Self', 'Your Expectation', 'About Parents Siblings'];
+            for (const marker of stopMarkers) {
+              const markerIndex = value.indexOf(marker);
+              if (markerIndex !== -1) {
+                value = value.substring(0, markerIndex).trim();
+                break;
+              }
+            }
+          }
+          
+          if (value) {
+            data[key] = value;
+            break;
+          }
+        }
+        
+        // Find the next field label after this one (including special labels)
         let endIndex = text.length;
         for (const pos of positions) {
           if (pos.index > startIndex) {

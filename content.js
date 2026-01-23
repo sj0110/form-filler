@@ -29,14 +29,36 @@ async function fillForm(data) {
     // Clean and process data before generating dynamic fields
     const cleanedData = { ...data };
     
-    // Clean Annual Income - remove "per annum" and everything after
+    // Clean Annual Income - ensure it only contains income with "per annum"
     if (cleanedData.annualIncome) {
-      let income = cleanedData.annualIncome.split('per annum')[0].trim();
-      // Remove "Rs." prefix if present, then add it back consistently
-      income = income.replace(/^Rs\.\s*/i, '').trim();
-      // Keep just the amount part (e.g., "20 Lakh")
-      income = income.split('More About')[0].trim(); // Remove any trailing text
-      cleanedData.annualIncome = income ? `Rs. ${income}` : cleanedData.annualIncome;
+      let income = cleanedData.annualIncome;
+      
+      // Remove everything after "per annum" (including "More About Self", etc.)
+      const perAnnumIndex = income.toLowerCase().indexOf('per annum');
+      if (perAnnumIndex !== -1) {
+        income = income.substring(0, perAnnumIndex + 'per annum'.length).trim();
+      } else {
+        // If "per annum" is not found, try to stop at "More About Self" or other field labels
+        const stopMarkers = ['More About Self', 'Your Expectation', 'About Parents Siblings'];
+        for (const marker of stopMarkers) {
+          const markerIndex = income.indexOf(marker);
+          if (markerIndex !== -1) {
+            income = income.substring(0, markerIndex).trim();
+            // Add "per annum" if it's missing
+            if (!income.toLowerCase().includes('per annum')) {
+              income = income + ' per annum';
+            }
+            break;
+          }
+        }
+      }
+      
+      // Ensure it starts with "Rs." if it contains a number
+      if (income && !income.match(/^Rs\./i) && income.match(/\d/)) {
+        income = 'Rs. ' + income.replace(/^Rs\.\s*/i, '').trim();
+      }
+      
+      cleanedData.annualIncome = income;
     }
     
     // Clean More About Self - ensure it doesn't include other fields
