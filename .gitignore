@@ -1,10 +1,10 @@
 # Dependencies
 node_modules/
-lib/pdf.min.js
-lib/pdf.worker.min.js
+# lib/pdf.min.js
+# lib/pdf.worker.min.js
 
 # Icons (generated)
-icons/*.png
+# icons/*.png
 
 # Python
 __pycache__/

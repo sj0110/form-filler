@@ -4,7 +4,10 @@
   "description": "Chrome extension to extract data from PDF biodata and automatically fill web forms",
   "main": "background.js",
   "scripts": {
-    "generate-icons": "python3 generate_icons.py"
+    "generate-icons": "python3 generate_icons.py",
+    "download-lib": "node download_lib.js",
+    "download-lib-py": "python3 download_lib.py",
+    "download-lib-sh": "bash download_lib.sh"
   },
   "keywords": [
     "chrome-extension",
